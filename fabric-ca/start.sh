@@ -18,6 +18,27 @@
 
 set -e
 
+# export will make LANGUAGE accessible from makeDocker.sh
+export LANGUAGE=golang
+while getopts ":l:" opt; do
+  case "$opt" in
+  l)
+    LANGUAGE=$OPTARG
+    ;;
+  : )
+    echo "Invalid option: $OPTARG requires an argument" 1>&2
+    exit 1;
+    ;;
+  esac
+done
+if [ "$LANGUAGE" = "go" ]; then
+  LANGUAGE = "golang"
+fi
+if [[ "$LANGUAGE" != "node" && "$LANGUAGE" != "golang" ]]; then
+    echo "LANGUAGE = ${LANGUAGE} is not supported"
+	  exit 1;
+fi
+
 SDIR=$(dirname "$0")
 source ${SDIR}/scripts/env.sh
 

@@ -16,6 +16,10 @@ export FABRIC_TAG=${FABRIC_TAG:-1.3.0}
 
 export FABRIC_CA_TAG=${FABRIC_CA_TAG:-${FABRIC_TAG}}
 export NS=${NS:-hyperledger}
+# This will cause a Exec format error on Mac when scripts/setup-fabric.sh runs because it will download the binary for Mac whereas it should download 
+# the binary for Linux even on a Mac. It sounds backwards but has to be that way because Docker containers on Mac run in a lightweight Linux VM. If 
+# you are running this script on a Mac set export FABRIC_TAG=local. FABRIC_TAG=local tells the function createDockerFiles not to download any images 
+# from the internet and use the pre-installed images on the machine. The pre-installed docker images on Mac (when you setup HL Fabric) will be in right format.
 export MARCH=$(echo "$(uname -s|tr '[:upper:]' '[:lower:]'|sed 's/mingw64_nt.*/windows/')-$(uname -m | sed 's/x86_64/amd64/g')" | awk '{print tolower($0)}')
 CA_BINARY_FILE=hyperledger-fabric-ca-${MARCH}-${FABRIC_CA_TAG}.tar.gz
 URL=https://nexus.hyperledger.org/content/repositories/releases/org/hyperledger/fabric-ca/hyperledger-fabric-ca/${MARCH}-${FABRIC_CA_TAG}/${CA_BINARY_FILE}
@@ -140,7 +144,7 @@ function writeRunFabric {
     image: hyperledger/fabric-ca-tools
     environment:
       - GOPATH=/opt/gopath
-    command: /bin/bash -c 'sleep 3;/scripts/run-fabric.sh 2>&1 | tee /$RUN_LOGFILE; sleep 99999'
+    command: /bin/bash -c 'sleep 3;/scripts/run-fabric.sh -l ${LANGUAGE} 2>&1 | tee /$RUN_LOGFILE; sleep 99999'
     volumes:
       - ./scripts:/scripts
       - ./$DATA:/$DATA
